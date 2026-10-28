@@ -1,0 +1,14 @@
+[
+  { "question": "what's the price of the Unlimited Plus plan?", "expectedCitations": ["plan-unlimited-plus"], "mustContain": ["$39.99"] },
+  { "question": "what's included in the basic plan", "expectedCitations": ["plan-basic"], "mustContain": ["2 GB"] },
+  { "question": "how many GB does the student saver include", "expectedCitations": ["plan-student-saver"], "mustContain": ["20 GB"] },
+  { "question": "do I need a student ID for the Student Saver?", "expectedCitations": ["plan-student-saver"], "mustContain": ["Valid student ID required"] },
+  { "question": "what does the Prepaid Daily Pass cost?", "expectedCitations": ["plan-prepaid-daily-pass"], "mustContain": ["$1.99 per day"] },
+  { "question": "what's the price of the Business Starter plan?", "expectedCitations": ["plan-business-starter"], "mustContain": ["$34.99"] },
+  { "question": "is there a plan for tablets", "expectedCitations": ["plan-tablet-data-plan"], "mustContain": ["30 GB"] },
+  { "question": "family data plan", "expectedCitations": ["plan-family-data-plan"], "mustContain": ["200 GB"] },
+  { "question": "what's the price of the Family SMS Bundle?", "expectedCitations": ["plan-family-sms-bundle"], "mustContain": ["$4.99"] },
+  { "question": "what does the platinum max plan cost?", "notFound": true },
+  { "question": "why was I charged $40 extra this month", "notFound": true },
+  { "question": "do you offer international roaming in Japan?", "notFound": true }
+]

@@ -1,0 +1,38 @@
+{
+  "milestone": 6,
+  "title": "Re-run the original bug",
+  "schedule": {
+    "targetMinutes": 8,
+    "hintAfterMinutes": [
+      3,
+      5,
+      7
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "The pieces already exist: `retrieve` (milestone 4), `buildPrompt` (milestone 5) and the model. `answer()` is the pipe between them.\n\nWhat does each piece take in, and what does it give back? And what does the card say `citations` must hold?"
+    },
+    {
+      "label": "Approach",
+      "text": "In order: retrieve the top-k chunks for the question, build the prompt from them and the question, call `model.generate({ system, user })`, then turn the text into the result.\n\nThe citations are the chunk ids the answer wrote down. Keep only the ones that were really retrieved. For each citation, `sources` needs the chunk id and the chunk text as `snippet`."
+    },
+    {
+      "label": "Near-solution",
+      "text": "`const known = new Map(retrieved.map(c => [c.chunkId, c]))`\n\nThe cited ids: `[...text.matchAll(/\\[chunk_id:\\s*([^\\]\\s]+)\\s*\\]/g)].map(m => m[1])`. Filter them with `known.has(id)`, and build `sources` from `known.get(id).text`.\n\nLet the caller swap the model: `answer(pg, question, { model = { generate }, k = config.defaultK } = {})`. Return `{ answer, citations, sources, retrieved }`."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: src/answer.js is a starter that asks the model with no context, which is the bug from milestone 1. retrieve(pg, question, { k }) is in src/retrieve.js, buildPrompt({ chunks, question }) is in src/prompt.js, and generate({ system, user }) is in src/model.js.\n\nTASK: Rewrite answer(pg, question, { model, k }) in src/answer.js as a grounded answer.\n\nACCEPTANCE: retrieve the top k chunks (k defaults to config.defaultK), build the prompt, call model.generate (the model option defaults to { generate } from src/model.js, so a test can pass another one). Return { answer, citations, sources, retrieved }: answer is the model's text; citations are the chunk ids written in the answer as [chunk_id: ...], and ONLY ids that were really retrieved (an id the model made up must not appear); sources has { chunkId, snippet } for each citation, where snippet is that chunk's text; retrieved is the chunks that were retrieved. A not-found answer has citations [] and sources [].\n\nVERIFY: npm run ask -- \"what's the price of the Unlimited Plus plan?\" shows the real price with its citation, and npm run step -- 6.",
+    "approach": "This is where grounding becomes a pipeline: a question goes in, and a checkable answer comes out. The most important rule is that a citation is only a citation if the chunk was really in front of the model. Trusting the model's own list of sources would make citations decorative.\n\nNow run the question from milestone 1 again. It should give the real price with a source you can open, and it should not give the old invented answer.",
+    "commonMistakes": [
+      "Trusting the model's citations. A made-up chunk id must be dropped.",
+      "Returning every retrieved chunk as a source, instead of only the cited ones.",
+      "Importing the model directly, so a test cannot pass another one. The card asks for the model option.",
+      "Forgetting to return `retrieved`.",
+      "Ignoring k.",
+      "Not running the original question again to see the bug is gone."
+    ]
+  }
+}

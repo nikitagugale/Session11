@@ -1,0 +1,39 @@
+{
+  "milestone": 3,
+  "title": "Build the ingestion pipeline",
+  "schedule": {
+    "targetMinutes": 13,
+    "hintAfterMinutes": [
+      5,
+      9,
+      12
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "Three jobs: (1) a place to keep the data, (2) put each chunk in, with its embedding, and (3) make running it twice harmless.\n\nStart with the place. `npm run sql` shows what is in the database. `openDb()` in src/db.js runs every `.sql` file in `migrations/`, once."
+    },
+    {
+      "label": "Approach",
+      "text": "pgvector's column type is `vector(1536)`: the embedder makes 1536 numbers. `embed(text)` gives the numbers. `toPgVector(...)` writes them in the text format Postgres reads, and you add `::vector` after the parameter.\n\nFor \"safe to run twice\": what should happen when the chunk id is already there? And what should happen to a plan that is no longer in the sheet?"
+    },
+    {
+      "label": "Near-solution",
+      "text": "Use an upsert: `INSERT ... ON CONFLICT (chunk_id) DO UPDATE SET ...`.\n\nAfter the loop, delete the rows whose chunk_id is not in the current chunk list. You can pass an array: `DELETE FROM plan_chunks WHERE chunk_id <> ALL($1::text[])`.\n\nRecord the time the same way: upsert the row `last_ingested_at` in `ingest_meta`, with `new Date().toISOString()`.\n\nRead the sheet's path from `config.planDocs`. Do not type it in. Always close the database at the end."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: src/chunk.js has chunkPlans(markdown). src/lib/embed.js has embed(text), which makes 1536 numbers, and toPgVector(vector), which writes them as pgvector text. src/db.js has openDb(), which runs the .sql files in migrations/ once each, and returns { pg, close }. The plan sheet path is config.planDocs.\n\nTASK: Write a migration and scripts/ingest.js so that \"node scripts/ingest.js\" fills the database from the plan sheet.\n\nACCEPTANCE: A migration in migrations/ creates plan_chunks (chunk_id text primary key, plan_name text, text text, embedding vector(1536)) and ingest_meta (key text primary key, value text). The script chunks the sheet, embeds each chunk's text, and upserts into plan_chunks. It deletes rows whose chunk_id is no longer in the sheet. It stores last_ingested_at (an ISO time) in ingest_meta. Running it twice must not fail or duplicate anything, and a changed or removed plan must be reflected. Close the database at the end.\n\nVERIFY: npm run ingest, then npm run sql -- \"SELECT chunk_id, plan_name FROM plan_chunks\", then npm run step -- 3.",
+    "approach": "An upsert makes ingestion repeatable: the same command can run every night. A delete step stops a plan that was removed from the sheet from living on in the database and being quoted as if it were still sold.\n\nThe embedding is made from the chunk text, because that is what a question has to match. last_ingested_at is what milestone 8 will compare the sheet's date with.",
+    "commonMistakes": [
+      "A plain INSERT. The second run fails on the duplicate chunk id.",
+      "No delete step. A removed plan stays in the database for ever.",
+      "Embedding the plan name instead of the whole text.",
+      "Typing the path to the sheet. The checks use a scratch copy through config.planDocs.",
+      "Forgetting ::vector on the parameter.",
+      "Leaving the database open. The next script then finds the folder locked.",
+      "Building an ivfflat index in the migration, on a table that is still empty. See what it does in milestone 4."
+    ]
+  }
+}

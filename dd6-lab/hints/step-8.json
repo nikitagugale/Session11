@@ -1,0 +1,38 @@
+{
+  "milestone": 8,
+  "title": "Add a staleness check",
+  "schedule": {
+    "targetMinutes": 7,
+    "hintAfterMinutes": [
+      3,
+      5,
+      7
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "Two times matter: when the sheet last changed (the file's modified time) and when you last ingested (the `ingest_meta` row from milestone 3). Stale means the first is later than the second.\n\nWhat should the script's exit code be in each case, and who reads it?"
+    },
+    {
+      "label": "Approach",
+      "text": "`statSync(config.planDocs).mtimeMs` is the file's modified time in milliseconds. `Date.parse(value)` turns the stored text into the same unit.\n\nA script that finds a problem sets `process.exitCode = 1` and prints a clear message: what is wrong, and what to run. npm runs a script called `predeploy` before `deploy`, and stops if it fails."
+    },
+    {
+      "label": "Near-solution",
+      "text": "Open the database with `openDb()`. Read `SELECT value FROM ingest_meta WHERE key = 'last_ingested_at'`. Compare. If the sheet is newer, print `STALE: ... Run: npm run ingest` and exit 1. Otherwise print an OK line and exit 0. If nothing was ingested yet, that is stale too.\n\nThen add `\"predeploy\": \"node scripts/check-staleness.js\"` to package.json, change the sheet, and try `npm run deploy`."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: scripts/ingest.js stores last_ingested_at in the ingest_meta table. config.planDocs is the path to the plan sheet. package.json has a \"deploy\" script that pretends to ship the bot.\n\nTASK: Write scripts/check-staleness.js and wire it as a pre-deploy check, so that a stale corpus cannot ship silently.\n\nACCEPTANCE: It compares the modified time of the plan sheet with last_ingested_at. If the sheet is newer, or nothing has been ingested, it prints a clear message that starts with STALE and says to run npm run ingest, and exits with code 1. Otherwise it prints an OK message and exits 0. It never changes anything. Add \"predeploy\": \"node scripts/check-staleness.js\" to package.json, so that npm run deploy stops when the corpus is stale.\n\nVERIFY: run touch data/plan-docs.md (it makes the sheet newer without changing a word) and then npm run deploy (it must refuse), run npm run ingest and deploy again (it must go ahead), then npm run step -- 8.",
+    "approach": "The pipeline is only as current as its last ingest. Nothing in the answer tells a customer that the price is old, so the guard has to sit where the change ships. A script that fails with a clear message, run as a pre-deploy step, turns a silent mistake into a stopped deploy that tells you what to do.",
+    "commonMistakes": [
+      "Exiting 0 when the corpus is stale. The deploy goes ahead anyway.",
+      "Comparing text with text, not time with time.",
+      "A message that says \"stale\" but not what to run.",
+      "Forgetting the case where nothing has been ingested yet.",
+      "Not wiring it as predeploy, so it only runs if somebody remembers.",
+      "Leaving the database open, so the next command finds it locked."
+    ]
+  }
+}

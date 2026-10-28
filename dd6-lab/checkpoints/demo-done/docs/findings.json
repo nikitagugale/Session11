@@ -1,0 +1,8 @@
+{
+  "question": "what's the price of the Unlimited Plus plan?",
+  "inventedAnswer": "The Unlimited Plus plan costs $64.99 per month.",
+  "inventedPrice": 64.99,
+  "realPrice": 39.99,
+  "inventedPriceInSheet": false,
+  "citationsReturned": 0
+}

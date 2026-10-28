@@ -1,0 +1,37 @@
+{
+  "milestone": 1,
+  "title": "Reproduce the hallucination",
+  "schedule": {
+    "targetMinutes": 8,
+    "hintAfterMinutes": [
+      3,
+      5,
+      7
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "You do not need to read the bot's code to use it. `npm run help` lists the command that asks it a question. Ask it the exact question from the card.\n\nThen ask yourself: where could this price have come from? Does the bot look anything up before it answers?"
+    },
+    {
+      "label": "Approach",
+      "text": "Copy what the bot printed, exactly. Do not retype it: the answer changes if the wording changes.\n\nTo find out whether a price is real, search the plan sheet. It is the file `data/plan-docs.md`. The editor search (Ctrl+F) works, and so does `grep`.\n\nAlso look at the line under the answer that talks about citations."
+    },
+    {
+      "label": "Near-solution",
+      "text": "Four things to find:\n\n- the price inside the bot's answer (a number, with no $);\n- the price the sheet gives for Unlimited Plus (look for the heading `## Unlimited Plus`);\n- whether the made-up price appears anywhere in the sheet (search for it);\n- how many citations the bot gave.\n\nPut them in docs/findings.json with the six keys from the card. Numbers are numbers, not text."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: This repo is a Node project: a telecom FAQ bot. src/answer.js asks the model directly. It never looks at data/plan-docs.md. Do not change any code.\n\nTASK: Reproduce the bug, and record the evidence in docs/findings.json.\n\nHOW: Run npm run ask -- \"what's the price of the Unlimited Plus plan?\" and copy the answer exactly. Read the Unlimited Plus section of data/plan-docs.md for its real price. Search the sheet for the price the bot invented.\n\nOUTPUT: docs/findings.json with exactly these keys: question (text), inventedAnswer (text, exactly as the bot printed it), inventedPrice (number), realPrice (number), inventedPriceInSheet (true or false), citationsReturned (number).\n\nVERIFY: npm run step -- 1",
+    "approach": "The bot answers from the model's general knowledge. There is no retrieval and no context, so there is nothing to cite. The price is fluent and confident, and it is not in the sheet anywhere.\n\nKeep the exact wrong answer. Milestone 6 uses it to prove the fix: the same question must not give this answer again.",
+    "commonMistakes": [
+      "Retyping the answer instead of copying it. A small change is a different answer.",
+      "Asking a slightly different question. The made-up price depends on the exact words, so use the question on the card.",
+      "Writing a price in quotes. \"64.99\" is text. 64.99 is a number.",
+      "Guessing whether the invented price is in the sheet instead of searching for it.",
+      "Reading the real price from memory of the slide, not from data/plan-docs.md."
+    ]
+  }
+}

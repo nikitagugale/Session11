@@ -1,0 +1,38 @@
+{
+  "milestone": 7,
+  "title": "Add fixture tests",
+  "schedule": {
+    "targetMinutes": 14,
+    "hintAfterMinutes": [
+      5,
+      9,
+      13
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "Monday's rule: write the questions before you trust the feature. Mix three kinds: questions the sheet answers; questions it can never answer; and questions that tempt the bot to the wrong plan.\n\nThen ask yourself: which broken versions of this bot would your questions catch?"
+    },
+    {
+      "label": "Approach",
+      "text": "A pair is plain data: `{ question, expectedCitations: [...], mustContain: [...] }`, or `{ question, notFound: true }`.\n\nThe runner loads the file, calls `answer()` for each pair, compares, prints PASS or FAIL with a reason for each, and sets a non-zero exit code if anything failed.\n\nThink of three ways the bot could break: a chunker that cuts plans apart, a prompt that does not say \"only the context\", and a prompt that does not ask for citations. Make sure at least one pair fails for each."
+    },
+    {
+      "label": "Near-solution",
+      "text": "A failing fixture only helps if it says why. Print what was expected and what came back. For a not-found pair, the answer must equal `config.notFound` and `citations` must be empty.\n\nIf one of your own pairs fails, do not change the pair until you know why. Was it retrieval (the right chunk never came back: try `npm run retrieve -- \"...\"`) or generation (the right chunk was there, but the answer is wrong)?\n\nAdd `\"fixtures\": \"node scripts/fixtures.js\"` to the scripts in package.json."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: answer(pg, question) in src/answer.js is the whole pipeline. config.notFound is the sentence the bot says when the sheet has no answer. The database is filled by node scripts/ingest.js.\n\nTASK: Add a set of 12 known question and answer pairs, and a runner for them.\n\nACCEPTANCE: tests/fixtures/qa.json is a list. Each pair has a question and EITHER expectedCitations (a list of chunk ids that must be cited) with optional mustContain (text the answer must contain), OR notFound: true. Include at least 3 not-found pairs (a plan that does not exist, an account question, something the sheet never covers) and at least 5 pairs with a citation, including a price, a feature, and a plan with a similar name to another. scripts/fixtures.js opens the database, calls answer() for every pair, prints PASS or FAIL with the reason for each, prints how many passed, and exits non-zero if any failed. Add a \"fixtures\" script to package.json. The fixtures must fail if the chunker splits plans, if the prompt does not say to use only the context, or if it does not ask for citations.\n\nVERIFY: npm run fixtures, then npm run step -- 7 (it also runs your fixtures against three deliberately broken copies of your project).",
+    "approach": "A test that cannot fail proves nothing. The three broken copies the check builds are the three classic mistakes of this kind of feature. If your fixtures pass against all three, they would not have told you when someone broke the bot.\n\nWhen a fixture fails, find out which layer failed before you fix anything. A wrong chunk means retrieval. The right chunk and a wrong claim means generation. Fixing the wrong layer hides the real bug.",
+    "commonMistakes": [
+      "Only happy-path questions. Not-found pairs are what stop an invented answer reaching a customer.",
+      "An expected citation with a typo. It can never pass.",
+      "A runner that exits 0 even when a pair fails.",
+      "A runner that says FAIL and not why.",
+      "Changing a failing pair to make it pass, before finding out why it failed.",
+      "A \"not found\" pair that the sheet can actually answer."
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "milestone": 9,
+  "title": "Homework: a second document type",
+  "schedule": {
+    "targetMinutes": 60,
+    "hintAfterMinutes": [
+      10,
+      20,
+      30
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "Open data/roaming-policy.md and run your chunker on it. What is the logical unit here? Does the rule you wrote for the plan sheet still keep it whole?"
+    },
+    {
+      "label": "Approach",
+      "text": "Chunk ids need the document type in them, so a plan and a zone can never collide: `roaming-` plus the heading in lower case with dashes. Both documents go into the same table.\n\nOne more thing to think about: your ingest deletes chunks that are no longer in the sheet. What does that do to the roaming chunks if it only knows about the plan sheet?"
+    },
+    {
+      "label": "Near-solution",
+      "text": "Use the same section rule for both documents, with a different prefix for each. Put the shared rule in a new file (for example src/sections.js) and keep src/chunk.js exporting only chunkPlans, because the check for milestone 7 swaps that file for a broken copy. Collect the chunks of both documents into one list, upsert them all, and delete only the chunk ids that are in neither document.\n\nThen ask the three questions on the card and read the citations. Last, run npm run progress: milestones 1 to 8 should still be green."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: data/roaming-policy.md is a second document: one \"## \" section per roaming zone, with a Countries line, a Daily pass price, and some details, plus a \"Rules for all zones\" section. scripts/ingest.js currently ingests only the plan sheet into plan_chunks.\n\nTASK: Ingest the roaming policy as well, into the same table, so the bot can answer roaming questions with citations.\n\nACCEPTANCE: One run of node scripts/ingest.js ingests both documents (config.planDocs and config.roamingDocs). Roaming chunk ids are \"roaming-\" plus the heading in lower case with dashes, for example roaming-zone-c-asia-pacific. Each zone stays whole: its countries, its daily pass and its details. The clean-up step deletes only chunk ids that are in neither document. The plan questions still work. Keep src/chunk.js exporting only chunkPlans, and put any shared code in a new file.\n\nVERIFY: \"do you offer international roaming in Japan?\" cites roaming-zone-c-asia-pacific; npm run step -- 9; then npm run progress, which must still show milestones 1 to 8 green.",
+    "approach": "The same rule works because both documents have the same shape: one section per unit. What changes is the id (it must say which document the chunk came from) and the clean-up step (it must know about every document, or ingesting one deletes the other).",
+    "commonMistakes": [
+      "Ids without a document prefix, so two documents can collide.",
+      "A clean-up step that only knows one document, and deletes the other's chunks.",
+      "A chunker that looks for a \"Price:\" line, which the roaming zones do not have.",
+      "Updating the fixtures from milestone 7: the Japan question is no longer a not-found.",
+      "Adding a new export to src/chunk.js: the milestone 7 check swaps that file for a broken copy, and it cannot run if something imports a name the copy does not have.",
+      "A staleness check that only looks at the plan sheet."
+    ]
+  }
+}

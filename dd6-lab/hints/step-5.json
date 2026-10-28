@@ -1,0 +1,38 @@
+{
+  "milestone": 5,
+  "title": "Write the grounded prompt",
+  "schedule": {
+    "targetMinutes": 8,
+    "hintAfterMinutes": [
+      3,
+      5,
+      7
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "Be the model for a minute. What exactly does it need to be told, so that it cannot \"helpfully\" fill a gap? Write down three rules before you write the prompt.\n\nThe stand-in model reads your system prompt literally. The comment at the top of src/model.js says how."
+    },
+    {
+      "label": "Approach",
+      "text": "The three rules: use ONLY the context; cite the chunk id of every fact, with an example of the format; and for the not-found case, give the exact sentence from the card, in double quotes, after the words \"respond exactly\".\n\nThe user message needs a line that says CONTEXT:, each chunk behind its own `[chunk_id: <id>]` line, and a line that says QUESTION:."
+    },
+    {
+      "label": "Near-solution",
+      "text": "System: Answer using ONLY the CONTEXT below. Cite the chunk_id for every plan you rely on, like [chunk_id: plan-07]. If the answer is not in the CONTEXT, respond exactly: \"<the sentence>\".\n\nUser: `CONTEXT:`, then for each chunk the line `[chunk_id: <id>]`, a new line, and the chunk text, with a blank line between chunks. Then `QUESTION: ` and the question.\n\nUse `config.notFound` for the sentence so you do not retype it."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: src/prompt.js has a starter buildPrompt that throws. The stand-in model in src/model.js reads the prompt literally. config.notFound is the sentence the bot must say when the answer is not in the sheet.\n\nTASK: Write buildPrompt({ chunks, question }) in src/prompt.js. It returns { system, user }.\n\nACCEPTANCE: The system prompt tells the model to answer using ONLY the CONTEXT, to cite the chunk_id of every plan it relies on in brackets with an example like [chunk_id: plan-07], and, if the answer is not in the CONTEXT, to respond exactly with the sentence from config.notFound, in double quotes. The user message has a line \"CONTEXT:\", then each chunk as a line \"[chunk_id: <id>]\" followed by its text, then a line \"QUESTION: \" and the question, unchanged.\n\nVERIFY: npm run step -- 5.",
+    "approach": "Grounding is a promise in the prompt and a duty in the pipeline. The prompt only works if the right chunks are in the context. Say the three rules plainly, give the exact words for \"not found\", and put the chunk ids where the model can see them, so that it can cite them.\n\nNotice how the stand-in model behaves with a weak prompt. Leave out \"only\" and it makes up a price. Leave out the citation rule and the answer has no citation. A real model is less predictable, so you must test the not-found path on purpose.",
+    "commonMistakes": [
+      "Leaving out the word \"only\", so the model \"helps\" from general knowledge.",
+      "A not-found instruction that is not exact (\"say you don't know\"). The check wants the sentence on the card, word for word, including the dash.",
+      "Asking for citations without showing the chunk ids in the context.",
+      "Putting the question before the context.",
+      "Not testing an empty context. With no chunks the model must still say not-found.",
+      "Retyping the not-found sentence by hand. Use config.notFound."
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "milestone": 4,
+  "title": "Write and test retrieval",
+  "schedule": {
+    "targetMinutes": 13,
+    "hintAfterMinutes": [
+      5,
+      8,
+      11
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "Try `npm run retrieve -- \"family data plan\"` and count the rows you get back. If there are fewer than 5, compare with `npm run sql -- \"SELECT count(*) FROM plan_chunks\"`.\n\nThe data is there, so something between your query and the table is hiding rows."
+    },
+    {
+      "label": "Approach",
+      "text": "Ask Postgres how it runs your query: put EXPLAIN in front of it, for example `npm run sql -- \"EXPLAIN SELECT chunk_id FROM plan_chunks ORDER BY embedding <=> (SELECT embedding FROM plan_chunks LIMIT 1) LIMIT 5\"`.\n\nIs it using an index? An index is a shortcut, and a shortcut can skip rows. What does an ivfflat index do when it was built on a table that was empty at the time?\n\nIf you get all the rows: check the order, and what the score means. `<=>` is a distance. 0 is perfect."
+    },
+    {
+      "label": "Near-solution",
+      "text": "An ivfflat index sorts the vectors into groups (lists) when the index is BUILT. If the table was empty then, there are no groups to search, and queries that use the index lose rows.\n\nWith 12 chunks you do not need an index at all. The check builds its own fresh database from your `migrations/` folder, so the repair has to live there: edit the migration and run `npm run reset-db` then `npm run ingest`, or add a new `.sql` file that drops the index (migrations run once each, in file-name order). If you want an index, build it after the data is in.\n\nReturn the similarity as `1 - distance`, and order by distance, smallest first."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: plan_chunks(chunk_id, plan_name, text, embedding vector(1536)) is filled by scripts/ingest.js. src/lib/embed.js has embed(text) and toPgVector(vector). pgvector's <=> operator is the cosine DISTANCE: 0 means identical.\n\nTASK: Write retrieve(pg, question, { k = 5 }) in src/retrieve.js: the k chunks closest to the question, best first.\n\nACCEPTANCE: It returns an array of { chunkId, planName, text, score }. score is the cosine SIMILARITY (1 minus the distance), so a bigger score is a better match. Sorted best first. It returns k rows, or all rows if k is bigger than the table. Do not change the table. It must work on the table as ingested.\n\nVERIFY: npm run retrieve -- \"family data plan\" and two or three other questions: read the chunks it returns. Then npm run step -- 4.",
+    "approach": "Retrieval is: embed the question with the same embedder as the chunks, ask the database for the nearest vectors, and return them with a score a person can read.\n\nTwo things to watch. An ivfflat index built on an empty table loses rows, and with 12 chunks an exact scan is instant, so skip the index. And <=> is a distance, so sort ascending and turn it into a similarity for the score.\n\nLook at the results: for \"family data plan\" the Family SMS Bundle comes first and the Family Data Plan second. \"Similar\" is not the same as \"relevant\". That is what the demo's rerank step was for.",
+    "commonMistakes": [
+      "An ivfflat index built before the data is in. Queries through it lose rows.",
+      "Returning the distance as the score (0 is best, so the order looks backwards).",
+      "Sorting descending by distance.",
+      "Returning the rows with snake_case names (chunk_id) instead of { chunkId, planName, text, score }.",
+      "Not passing k, or a limit that is always 5.",
+      "Not looking at the results. The first result is not always the right plan."
+    ]
+  }
+}

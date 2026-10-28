@@ -1,0 +1,38 @@
+{
+  "milestone": 2,
+  "title": "Chunk the plan sheet",
+  "schedule": {
+    "targetMinutes": 10,
+    "hintAfterMinutes": [
+      4,
+      7,
+      10
+    ]
+  },
+  "levels": [
+    {
+      "label": "Nudge",
+      "text": "Run `npm run chunks`. It shows what your chunker makes and flags what is wrong with it.\n\nThe starter cuts the text into pieces of a fixed number of characters. Why is that a bad idea for a price list?"
+    },
+    {
+      "label": "Approach",
+      "text": "Look at how data/plan-docs.md is written. What marks the start of each plan?\n\nA good place to cut is where the document itself changes, not after a number of characters. Ask yourself what a chunk has to keep together so that it can still answer a question about one plan."
+    },
+    {
+      "label": "Near-solution",
+      "text": "Cut the text at every line that starts with `## `. Each piece, from its heading to the line before the next heading, is one plan.\n\nTake the name from the heading line. The title and the intro before the first `## ` belong to no plan: leave them out.\n\nMake the id from the name: `plan-`, then the name in lower case, with every run of other characters turned into one dash. Keep the text exactly as written."
+    }
+  ],
+  "reveal": {
+    "referenceBrief": "CONTEXT: src/chunk.js holds a starter chunker that cuts data/plan-docs.md into pieces of 250 characters. data/plan-docs.md has one \"## \" heading per plan, then a \"Price:\" line and a list of features. The lines before the first \"## \" are a title and an intro.\n\nTASK: Replace chunkPlans(markdown) so that it makes exactly one chunk per plan.\n\nACCEPTANCE: It returns an array of { chunkId, planName, text }. planName is the heading text. chunkId is \"plan-\" plus the name in lower case with every run of other characters replaced by one dash, and no dash at the start or end of the name part, for example plan-unlimited-plus. text is the plan's section exactly as written: the heading, the price line and every feature, verbatim. Never split a plan's price from its name. The title and intro are not a chunk. It must work with Windows line endings, and a \"###\" sub-heading or a blank line inside a plan must not start a new chunk. Keep the file name and the export.\n\nVERIFY: npm run chunks says every plan is in one chunk, then npm run step -- 2.",
+    "approach": "Split on the document's own structure, the \"## \" headings. That is the real boundary between facts. A fixed length cuts wherever the count runs out, even in the middle of a price.\n\nThe id comes from the name, not the position, so it stays the same when a plan is added or moved. The text stays verbatim, so what the bot shows a person is exactly what the sheet says.",
+    "commonMistakes": [
+      "Splitting on \"#\" instead of \"## \". That also splits at \"###\", and at the title.",
+      "Forgetting the last plan, because there is no \"## \" after it.",
+      "Keeping the title and intro as a chunk of their own.",
+      "Making ids from the position (chunk-03). They change whenever a plan is added.",
+      "Tidying or rewriting the text. The card asks for it verbatim.",
+      "Not testing with a changed sheet (a new plan, Windows line endings)."
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "faq-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "DD6 lab: a telecom FAQ bot that must answer only from the plan documents, with a citation for every claim.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node scripts/test.mjs",
+    "help": "node scripts/help.mjs",
+    "start": "node scripts/lab.mjs start",
+    "progress": "node scripts/progress.mjs",
+    "hint": "node scripts/hint.mjs",
+    "step": "node scripts/lab.mjs step",
+    "checkpoint": "node scripts/lab.mjs checkpoint",
+    "ask": "node scripts/ask.mjs",
+    "fixtures": "node scripts/fixtures.js",
+    "chunks": "node scripts/chunks.mjs",
+    "retrieve": "node scripts/retrieve.mjs",
+    "sql": "node scripts/sql.mjs",
+    "ingest": "node scripts/ingest.js",
+    "predeploy": "node scripts/check-staleness.js",
+    "deploy": "node scripts/deploy.mjs",
+    "reset-db": "node scripts/reset-db.mjs",
+    "doctor": "node scripts/lab.mjs doctor",
+    "baseline": "node scripts/lab.mjs baseline"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.4.6"
+  }
+}

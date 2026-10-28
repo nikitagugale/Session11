@@ -1,0 +1,12 @@
+[
+  { "question": "what's the price of the Unlimited Plus plan?", "expectedCitations": ["plan-unlimited-plus"], "mustContain": ["39.99"] },
+  { "question": "what's the price of the Unlimited plan?", "expectedCitations": ["plan-unlimited"], "mustContain": ["29.99"] },
+  { "question": "what is included in the Basic plan?", "expectedCitations": ["plan-basic"], "mustContain": ["2 GB"] },
+  { "question": "how many GB does the Student Saver include?", "expectedCitations": ["plan-student-saver"], "mustContain": ["20 GB"] },
+  { "question": "how much is the Prepaid Daily Pass?", "expectedCitations": ["plan-prepaid-daily-pass"], "mustContain": ["1.99"] },
+  { "question": "how much does the Tablet Data Plan cost?", "expectedCitations": ["plan-tablet-data-plan"], "mustContain": ["14.99"] },
+  { "question": "what's the price of the Platinum Galaxy plan?", "notFound": true },
+  { "question": "do you offer a plan with a free satellite phone?", "notFound": true },
+  { "question": "what is the price of the Gold Diamond plan?", "notFound": true },
+  { "question": "how much is the Family Data Plan?", "expectedCitations": ["plan-family-data-plan"], "mustContain": ["79.99"] }
+]
